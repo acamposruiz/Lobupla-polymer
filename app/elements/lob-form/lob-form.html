@@ -9,6 +9,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 -->
 
 <link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../../bower_components/iron-ajax/iron-request.html">
 <link rel="import" href="../../bower_components/iron-form/iron-form.html">
 <link rel="import" href="../../bower_components/iron-dropdown/iron-dropdown.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
@@ -24,23 +26,165 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
       }
     </style>
-    <div>Hello from <span>{{foo}}</span></div>
+    <div class="horizontal-section">
+      <form is="iron-form" id="formGet" method="get" action="/">
+        Find
+        <paper-dropdown-menu label="Venue type" name="venue_type" required>
+          <paper-menu class="dropdown-content" selected="0">
+            <template is="dom-repeat" items="{{venue_types}}">
+              <paper-item value="{{item}}">{{item}}</paper-item>
+            </template>
+          </paper-menu>
+        </paper-dropdown-menu>
+        near to
+        <paper-input name="location" label="Location" value="{{location}}" required></paper-input>
+        <br><br>
+
+        <paper-button raised
+                      on-click="_onClick">Submit
+        </paper-button>
+      </form>
+    </div>
+    <lob-map data="[[dataMap]]"></lob-map>
+    <iron-ajax
+      auto
+      url="https://api.foursquare.com/v2/venues/explore"
+      params='{{params}}'
+      handle-as="json"
+      last-response="{{response}}"
+      debounce-duration="300"></iron-ajax>
+    <iron-ajax
+      auto
+      url="http://maps.googleapis.com/maps/api/geocode/json"
+      params='{{paramsGoogleapis}}'
+      handle-as="json"
+      last-response="{{responseGoogleapis}}"
+      debounce-duration="300"></iron-ajax>
+    <iron-ajax
+      auto
+      url="http://maps.googleapis.com/maps/api/geocode/json"
+      params='{{paramsAddressFromCoordinates}}'
+      handle-as="json"
+      last-response="{{responseAddressFromCoordinates}}"
+      debounce-duration="300"></iron-ajax>
   </template>
   <script>
-  (function() {
-    'use strict';
+    (function () {
+      'use strict';
 
-    Polymer({
-      is: 'lob-form',
+      var coordenates = {},
+        paramsGoogleapis = {},
+        params = {
+          client_id: 'WU3OIROB5N3J1U3JPWWP0EUVICAZTMDCL2MUFLM2RKZ4HZFO',
+          client_secret: 'YF3BCWYDRXLSRUOSJ24WDBKWFZMYDGS1EYF5TSHM2O35VACU',
+          //ll: data.coordinates,
+          ll: '',
+          section: 'food',
+          venuePhotos: 1,
+          sortByDistance: 1,
+          radius: 1000,
+          limit: 7,
+          offset: 0,
+          v: '20150217'
+        };
 
-      properties: {
-        foo: {
-          type: String,
-          value: 'lob-form',
-          notify: true
-        }
+      navigator.geolocation.getCurrentPosition(GetLocation);
+
+      function GetLocation(location) {
+        coordenates = {lat: location.coords.latitude, lng: location.coords.longitude};
+        params.ll = coordenates.lat + ',' + coordenates.lng;
+
+        Polymer({
+          is: 'lob-form',
+          properties: {
+            venue_types: {
+              type: Array,
+              value: ['food', 'drinks', 'coffee', 'shops', 'arts', 'outdoors', 'sights', 'trending', 'specials', 'topPicks']
+            },
+            location: {
+              type: String,
+              value: '',
+              notify: true
+            },
+            dataMap: {
+              type: Object,
+              value: {},
+              notify: true
+            },
+            params: {
+              type: Object,
+              value: params,
+              notify: true
+            },
+            responseGoogleapis: {
+              type: Object,
+              value: {},
+              observer: 'responseGoogleapisObserve',
+              notify: true
+            },
+            responseAddressFromCoordinates: {
+              type: Object,
+              value: {},
+              observer: 'responseAddressFromCoordinatesObserve',
+              notify: true
+            },
+            response: {
+              type: Object,
+              value: {},
+              observer: 'responseObserve',
+              notify: true
+            }
+          },
+          responseGoogleapisObserve: function (responseGoogleapis) {
+            var that = this;
+            try {
+              coordenates = {
+                lat: responseGoogleapis.results[0].geometry.location.lat,
+                lng: responseGoogleapis.results[0].geometry.location.lng
+              };
+              params.ll = coordenates.lat + ',' + coordenates.lng;
+              that.params = Object.create(params);
+            } catch (e) {
+            }
+          },
+          responseAddressFromCoordinatesObserve: function (responseGoogleapis) {
+            try {
+              this.location = responseGoogleapis.results[0].formatted_address;
+            } catch (e) {
+            }
+          },
+          responseObserve: function (data) {
+            try {
+              this.dataMap = {
+                venues: data.response.groups[0].items,
+                coordenates: coordenates
+              };
+            } catch (e) {
+            }
+          },
+          attached: function () {
+            var that = this;
+            that.paramsAddressFromCoordinates = {
+              sensor: 'true_or_false',
+              latlng: params.ll
+            };
+            document.getElementById('formGet').addEventListener('iron-form-submit', function (event) {
+              try {
+                var paramsGoogleapis = {
+                  address: event.detail.location,
+                  components: 'country:ES'
+                };
+                params.section = event.detail.venue_type;
+                that.paramsGoogleapis = Object.create(paramsGoogleapis);
+              } catch (e) {
+              }
+            });
+          },
+          _onClick: function (event) {
+            Polymer.dom(event).localTarget.parentElement.submit();
+          }
+        });
       }
-    });
-  })();
+    })();
   </script>
 </dom-module>
