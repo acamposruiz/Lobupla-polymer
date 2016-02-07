@@ -118,7 +118,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         coordenates = {lat: location.coords.latitude, lng: location.coords.longitude};
         params.ll = coordenates.lat + ',' + coordenates.lng;
 
-
         Polymer({
           is: 'lob-search-form',
           properties: {
@@ -178,7 +177,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 lng: responseGoogleapis.results[0].geometry.location.lng
               };
               params.ll = coordenates.lat + ',' + coordenates.lng;
-              if (params.ll != that.params.ll || params.section != that.params.section) that.resetForm();
+              that.resetForm();
               that.params = Object.assign({}, params);
             } catch (e) {
             }
@@ -229,14 +228,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
           },
           _onPrevious: function (event) {
-            params.offset -= venuesCount;
-            this.showing = showingObject.update(-venuesCount).getText();
-            this.$.lobForm.submit();
+            if(params.offset > 0){
+              params.offset -= venuesCount;
+              this.showing = showingObject.update(-venuesCount).getText();
+              this.params = Object.assign({}, params);
+            };
           },
           _onNext: function (event) {
-            params.offset += venuesCount;
-            this.showing = showingObject.update(venuesCount).getText();
-            this.$.lobForm.submit();
+            if(params.offset < this.totalResults){
+              params.offset += venuesCount;
+              this.showing = showingObject.update(venuesCount).getText();
+              this.params = Object.assign({}, params);
+            };
           },
           _onClick: function (event) {
             this.$.lobForm.submit();
