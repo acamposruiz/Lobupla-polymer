@@ -18,8 +18,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         height: 600px;
       }
     </style>
-    <google-map latitude="[[data.coordenates.lat]]" longitude="[[data.coordenates.lng]]" fit-to-markers>
-      <template is="dom-repeat" items="{{data.venues}}">
+    <google-map id="map" latitude="[[data.coordenates.lat]]" longitude="[[data.coordenates.lng]]" fit-to-markers>
+      <template on-dom-change="updateMap" is="dom-repeat" items="{{data.venues}}">
         <google-map-marker latitude="{{item.venue.location.lat}}" longitude="{{item.venue.location.lng}}"
                            title="{{item.venue.name}}"></google-map-marker>
       </template>
@@ -31,7 +31,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
     Polymer({
       is: 'lob-map',
-
       properties: {
         data: {
           type: Object,
@@ -39,6 +38,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: 'dataObserve',
           notify: true
         }
+      },
+      updateMap: function(){
+        this.$.map.resize();
       },
       dataObserve: function(data){
       }

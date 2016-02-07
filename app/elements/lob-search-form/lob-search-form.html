@@ -19,21 +19,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="lob-search-form">
   <template>
+    <header>
+      <p>Total results: {{totalResults}}</p>
+
+      <p>Showing: {{showing}}</p>
+    </header>
     <div class="horizontal-section">
-      <form is="iron-form" id="formGet" method="get" action="/">
+      <form is="iron-form" id="lobForm" method="get" action="/">
         Find
         <paper-dropdown-menu label="Venue type" name="venue_type" required>
-          <paper-menu class="dropdown-content" selected="0">
+          <paper-menu class="dropdown-content" selected="{{venueTypeSelected}}">
             <template is="dom-repeat" items="{{venue_types}}">
               <paper-item value="{{item}}">{{item}}</paper-item>
             </template>
           </paper-menu>
         </paper-dropdown-menu>
         near to
-        <paper-input name="location" label="Location" value="{{location}}" required></paper-input>
+        <paper-input id="locationInput" name="location" label="Location" value="{{location}}" required></paper-input>
         <br><br>
 
         <paper-button raised
+                      on-click="_onPrevious">Previous
+        </paper-button>
+
+        <paper-button raised
+                      on-click="_onNext">Next
+        </paper-button>
+
+        <paper-button id="submitButtom" raised
                       on-click="_onClick">Submit
         </paper-button>
       </form>
@@ -61,117 +74,171 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       debounce-duration="300"></iron-ajax>
   </template>
   <script>
-  (function () {
-    'use strict';
+    (function () {
+      'use strict';
+      var venuesCount = 7;
 
-    var coordenates = {},
-      paramsGoogleapis = {},
-      params = {
-        client_id: 'WU3OIROB5N3J1U3JPWWP0EUVICAZTMDCL2MUFLM2RKZ4HZFO',
-        client_secret: 'YF3BCWYDRXLSRUOSJ24WDBKWFZMYDGS1EYF5TSHM2O35VACU',
-        //ll: data.coordinates,
-        ll: '',
-        section: 'food',
-        venuePhotos: 1,
-        sortByDistance: 1,
-        radius: 1000,
-        limit: 7,
-        offset: 0,
-        v: '20150217'
-      };
-
-    navigator.geolocation.getCurrentPosition(GetLocation);
-
-    function GetLocation(location) {
-      coordenates = {lat: location.coords.latitude, lng: location.coords.longitude};
-      params.ll = coordenates.lat + ',' + coordenates.lng;
-
-      Polymer({
-        is: 'lob-search-form',
-        properties: {
-          venue_types: {
-            type: Array,
-            value: ['food', 'drinks', 'coffee', 'shops', 'arts', 'outdoors', 'sights', 'trending', 'specials', 'topPicks']
+      var coordenates = {},
+        paramsGoogleapis = {},
+        showingObject = {
+          init:1,
+          last:venuesCount,
+          getText: function(){
+            return this.init+' to '+this.last;
           },
-          location: {
-            type: String,
-            value: '',
-            notify: true
-          },
-          params: {
-            type: Object,
-            value: params,
-            notify: true
-          },
-          responseGoogleapis: {
-            type: Object,
-            value: {},
-            observer: 'responseGoogleapisObserve',
-            notify: true
-          },
-          responseAddressFromCoordinates: {
-            type: Object,
-            value: {},
-            observer: 'responseAddressFromCoordinatesObserve',
-            notify: true
-          },
-          response: {
-            type: Object,
-            value: {},
-            observer: 'responseObserve',
-            notify: true
+          update: function(value){
+            this.init += value;
+            this.last += value;
           }
         },
-        responseGoogleapisObserve: function (responseGoogleapis) {
-          var that = this;
-          try {
-            coordenates = {
-              lat: responseGoogleapis.results[0].geometry.location.lat,
-              lng: responseGoogleapis.results[0].geometry.location.lng
-            };
-            params.ll = coordenates.lat + ',' + coordenates.lng;
-            that.params = Object.create(params);
-          } catch (e) {
-          }
-        },
-        responseAddressFromCoordinatesObserve: function (responseGoogleapis) {
-          try {
-            this.location = responseGoogleapis.results[0].formatted_address;
-          } catch (e) {
-          }
-        },
-        responseObserve: function (data) {
-          try {
-            this.fire('update-map', {
-              venues: data.response.groups[0].items,
-              coordenates: coordenates
-            });
-          } catch (e) {
-          }
-        },
-        attached: function () {
-          var that = this;
-          that.paramsAddressFromCoordinates = {
-            sensor: 'true_or_false',
-            latlng: params.ll
-          };
-          document.getElementById('formGet').addEventListener('iron-form-submit', function (event) {
+        params = {
+          client_id: 'WU3OIROB5N3J1U3JPWWP0EUVICAZTMDCL2MUFLM2RKZ4HZFO',
+          client_secret: 'YF3BCWYDRXLSRUOSJ24WDBKWFZMYDGS1EYF5TSHM2O35VACU',
+          //ll: data.coordinates,
+          ll: '',
+          section: 'food',
+          venuePhotos: 1,
+          sortByDistance: 1,
+          radius: 1000,
+          limit: venuesCount,
+          offset: 0,
+          v: '20150217'
+        };
+
+
+      navigator.geolocation.getCurrentPosition(GetLocation);
+
+      function GetLocation(location) {
+        coordenates = {lat: location.coords.latitude, lng: location.coords.longitude};
+        params.ll = coordenates.lat + ',' + coordenates.lng;
+
+        Polymer({
+          is: 'lob-search-form',
+          properties: {
+            venue_types: {
+              type: Array,
+              value: ['food', 'drinks', 'coffee', 'shops', 'arts', 'outdoors', 'sights', 'trending', 'specials', 'topPicks']
+            },
+            location: {
+              type: String,
+              value: '',
+              notify: true
+            },
+            showing: {
+              type: String,
+              value: showingObject.getText(),
+              notify: true
+            },
+            venueTypeSelected: {
+              type: String,
+              value: '0',
+              observer: 'venueTypeSelectedObserve',
+              notify: true
+            },
+            params: {
+              type: Object,
+              value: params,
+              notify: true
+            },
+            responseGoogleapis: {
+              type: Object,
+              value: {},
+              observer: 'responseGoogleapisObserve',
+              notify: true
+            },
+            responseAddressFromCoordinates: {
+              type: Object,
+              value: {},
+              observer: 'responseAddressFromCoordinatesObserve',
+              notify: true
+            },
+            response: {
+              type: Object,
+              value: {},
+              observer: 'responseObserve',
+              notify: true
+            }
+          },
+          responseGoogleapisObserve: function (responseGoogleapis) {
+            var that = this;
             try {
-              var paramsGoogleapis = {
-                address: event.detail.location,
-                components: 'country:ES'
+              coordenates = {
+                lat: responseGoogleapis.results[0].geometry.location.lat,
+                lng: responseGoogleapis.results[0].geometry.location.lng
               };
-              params.section = event.detail.venue_type;
-              that.paramsGoogleapis = Object.create(paramsGoogleapis);
+              params.ll = coordenates.lat + ',' + coordenates.lng;
+              that.params = Object.create(params);
             } catch (e) {
             }
-          });
-        },
-        _onClick: function (event) {
-          Polymer.dom(event).localTarget.parentElement.submit();
-        }
-      });
-    }
-  })();
+          },
+          venueTypeSelectedObserve: function (newvalue) {
+            if (this.venueTypeSelected && this.location) {
+              this.$.lobForm.submit();
+            }
+
+          },
+          responseAddressFromCoordinatesObserve: function (responseGoogleapis) {
+            try {
+              this.location = responseGoogleapis.results[0].formatted_address;
+            } catch (e) {
+            }
+          },
+          responseObserve: function (data) {
+            try {
+              this.totalResults = data.response.totalResults;
+              this.fire('update-map', {
+                venues: data.response.groups[0].items,
+                coordenates: coordenates
+              });
+            } catch (e) {
+            }
+          },
+          attached: function () {
+            var that = this;
+            that.paramsAddressFromCoordinates = {
+              sensor: 'true_or_false',
+              latlng: params.ll
+            };
+            document.getElementById('lobForm').addEventListener('iron-form-submit', function (event) {
+              try {
+                var paramsGoogleapis = {
+                  address: event.detail.location,
+                  components: 'country:ES'
+                };
+                params.section = that.venue_types[that.venueTypeSelected];
+                that.paramsGoogleapis = Object.create(paramsGoogleapis);
+              } catch (e) {
+              }
+            });
+            document.getElementById('locationInput').addEventListener('keypress', function (e) {
+              if (e.keyCode == 13) {
+                Polymer.dom(event).localTarget.parentElement.submit();
+              }
+            });
+          },
+          showingPrevious: function(){
+            showingObject.update(-venuesCount);
+            this.showing = showingObject.getText();
+          },
+          showingNext: function(){
+            showingObject.update(venuesCount);
+            this.showing = showingObject.getText();
+          },
+          _onPrevious: function (event) {
+            params.offset -= venuesCount;
+            this.showingPrevious();
+            this.$.lobForm.submit();
+          },
+          _onNext: function (event) {
+            params.offset += venuesCount;
+            this.showingNext();
+            this.$.lobForm.submit();
+          },
+          _onClick: function (event) {
+            this.$.lobForm.submit();
+          }
+        });
+      }
+    })();
   </script>
 </dom-module>
