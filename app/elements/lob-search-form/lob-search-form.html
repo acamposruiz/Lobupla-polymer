@@ -79,7 +79,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var venuesCount = 7;
 
       var coordenates = {},
-        paramsGoogleapis = {},
+        paramsGoogleapis = {}, totalResults,
         showingObject = {
           init:1,
           last:venuesCount,
@@ -89,7 +89,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             return this;
           },
           getText: function(){
-            return this.init+' to '+this.last;
+            return this.init+' to '+ (Math.min(Number(totalResults), this.last) || this.last);
           },
           update: function(value){
             this.init += value;
@@ -196,7 +196,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           responseObserve: function (data) {
             try {
-              this.totalResults = data.response.totalResults;
+              totalResults = this.totalResults = data.response.totalResults;
               this.fire('update-map', {
                 venues: data.response.groups[0].items,
                 coordenates: coordenates
@@ -235,7 +235,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             };
           },
           _onNext: function (event) {
-            if(params.offset < this.totalResults){
+            if(params.offset+venuesCount < this.totalResults){
               params.offset += venuesCount;
               this.showing = showingObject.update(venuesCount).getText();
               this.params = Object.assign({}, params);
