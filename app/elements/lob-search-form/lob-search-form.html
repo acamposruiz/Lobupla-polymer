@@ -83,12 +83,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         showingObject = {
           init:1,
           last:venuesCount,
+          reset: function() {
+            this.init = 1;
+            this.last = 7;
+            return this;
+          },
           getText: function(){
             return this.init+' to '+this.last;
           },
           update: function(value){
             this.init += value;
             this.last += value;
+            return this;
           }
         },
         params = {
@@ -111,6 +117,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       function GetLocation(location) {
         coordenates = {lat: location.coords.latitude, lng: location.coords.longitude};
         params.ll = coordenates.lat + ',' + coordenates.lng;
+
 
         Polymer({
           is: 'lob-search-form',
@@ -137,7 +144,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             },
             params: {
               type: Object,
-              value: params,
+              value: Object.assign({}, params),
               notify: true
             },
             responseGoogleapis: {
@@ -159,6 +166,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               notify: true
             }
           },
+          resetForm: function(){
+            params.offset = 0;
+            this.showing = showingObject.reset().getText();
+          },
           responseGoogleapisObserve: function (responseGoogleapis) {
             var that = this;
             try {
@@ -167,7 +178,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
                 lng: responseGoogleapis.results[0].geometry.location.lng
               };
               params.ll = coordenates.lat + ',' + coordenates.lng;
-              that.params = Object.create(params);
+              if (params.ll != that.params.ll || params.section != that.params.section) that.resetForm();
+              that.params = Object.assign({}, params);
             } catch (e) {
             }
           },
@@ -216,22 +228,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               }
             });
           },
-          showingPrevious: function(){
-            showingObject.update(-venuesCount);
-            this.showing = showingObject.getText();
-          },
-          showingNext: function(){
-            showingObject.update(venuesCount);
-            this.showing = showingObject.getText();
-          },
           _onPrevious: function (event) {
             params.offset -= venuesCount;
-            this.showingPrevious();
+            this.showing = showingObject.update(-venuesCount).getText();
             this.$.lobForm.submit();
           },
           _onNext: function (event) {
             params.offset += venuesCount;
-            this.showingNext();
+            this.showing = showingObject.update(venuesCount).getText();
             this.$.lobForm.submit();
           },
           _onClick: function (event) {
