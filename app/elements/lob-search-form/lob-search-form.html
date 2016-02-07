@@ -183,10 +183,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           },
           venueTypeSelectedObserve: function (newvalue) {
-            if (this.venueTypeSelected && this.location) {
+            if (this.location) {
               this.$.lobForm.submit();
             }
-
           },
           responseAddressFromCoordinatesObserve: function (responseGoogleapis) {
             try {
@@ -197,6 +196,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           responseObserve: function (data) {
             try {
               totalResults = this.totalResults = data.response.totalResults;
+              this.showing = showingObject.getText();
               this.fire('update-map', {
                 venues: data.response.groups[0].items,
                 coordenates: coordenates
