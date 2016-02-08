@@ -39,11 +39,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           notify: true
         }
       },
+      listeners: {
+        'update-data-map': 'updateDataMap'
+      },
       _clickVenue: function(e){
         this.fire('select-venue', e.currentTarget.venueIndex);
       },
       updateMap: function(){
         this.$.map.resize();
+      },
+      updateDataMap: function(e, data){
+        this.data = data;
       },
       dataObserve: function(data){
       }
