@@ -17,23 +17,73 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         display: block;
       }
     </style>
-    <div>Hello from <span>{{foo}}</span></div>
+    <header><h1>{{venue.name}}</h1></header>
+    <section>
+      <img src="{{imgPath}}" alt=""/>
+    </section>
+    <paper-button raised
+                  on-click="_onPrevious">Previous
+    </paper-button>
+
+    <paper-button raised
+                  on-click="_onNext">Next
+    </paper-button>
   </template>
   <script>
-  (function() {
-    'use strict';
+    (function () {
+      'use strict';
+      var venuesCount;
 
-    Polymer({
-      is: 'lob-venue-detail',
+      Polymer({
+        is: 'lob-venue-detail',
 
-      properties: {
-        foo: {
-          type: String,
-          value: 'lob-venue-detail',
-          notify: true
+        properties: {
+          venueIndex: {
+            type: Number,
+            observer: 'venueIndexObserve',
+            notify: true
+          },
+          venues: {
+            type: Array,
+            value: [],
+            observer: 'venuesObserve',
+            notify: true
+          },
+          venue: {
+            type: Object,
+            value: {},
+            observer: 'venueObserve',
+            notify: true
+          }
+        },
+        _onPrevious: function (event) {
+          if(this.venueIndex - 1 < 0){
+            this.venueIndex = venuesCount - 1;
+          }else{
+            this.venueIndex -= 1;
+          }
+        },
+        _onNext: function (event) {
+          this.venueIndex = (this.venueIndex + 1) % venuesCount;
+        },
+        venuesObserve: function (venues) {
+          venuesCount = venues.length;
+        },
+        venueIndexObserve: function (venueIndex) {
+          try {
+            this.venue = this.venues[venueIndex].venue;
+          } catch (e) {
+          }
+          ;
+        },
+        venueObserve: function (venue) {
+          try {
+            this.imgPath = venue.photos.groups[0].items[0].prefix + '150x150' + venue.photos.groups[0].items[0].suffix;
+          } catch (e) {
+          }
+          ;
         }
-      }
-    });
-  })();
+      });
+    })();
   </script>
 </dom-module>

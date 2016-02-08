@@ -23,7 +23,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
 
     <lob-search-form on-update-map="updateMap"></lob-search-form>
-    <lob-venue-detail venue="[[venue]]"></lob-venue-detail>
+    <lob-venue-detail venues="[[dataMap.venues]]" venue-index="[[venue]]"></lob-venue-detail>
     <lob-map id="myMap" data="[[dataMap]]" on-select-venue="selectVenue"></lob-map>
 
   </template>
@@ -34,9 +34,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       Polymer({
         is: 'lob-container',
         properties: {},
-        selectVenue: function(e,data){
-          console.dir(data.venue);
-          this.venue = data.venue;
+        selectVenue: function(e,venueIndex){
+          /*console.dir(data.venue);*/
+          this.venue = venueIndex;
         },
         updateMap: function(e,data){
           this.dataMap = data;

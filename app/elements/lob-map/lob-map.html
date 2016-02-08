@@ -40,7 +40,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
       },
       _clickVenue: function(e){
-        this.fire('select-venue', this.data.venues[e.currentTarget.venueIndex]);
+        this.fire('select-venue', e.currentTarget.venueIndex);
       },
       updateMap: function(){
         this.$.map.resize();
