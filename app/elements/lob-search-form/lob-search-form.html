@@ -141,6 +141,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               observer: 'venueTypeSelectedObserve',
               notify: true
             },
+            venueType: {
+              type: String,
+              value: 'food',
+              notify: true
+            },
+            totalResults: {
+              type: Number,
+              value: 0,
+              notify: true
+            },
             params: {
               type: Object,
               value: Object.assign({}, params),
@@ -183,6 +193,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             }
           },
           venueTypeSelectedObserve: function (newvalue) {
+            this.venueType = this.venue_types[newvalue];
             if (this.location) {
               this.$.lobForm.submit();
             }
