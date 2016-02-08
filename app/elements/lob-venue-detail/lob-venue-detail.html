@@ -56,6 +56,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             notify: true
           }
         },
+        listeners: {
+          'update-venue-index': 'updateVenueIndex',
+          'update-data-map': 'updateDataMap'
+        },
+        updateDataMap: function(e, data){
+          this.venues = data.venues;
+        },
+        updateVenueIndex: function(e, venueIndex){
+          this.venueIndex = venueIndex;
+          this.venue = this.venues[venueIndex].venue;
+        },
         _onPrevious: function (event) {
           if(this.venueIndex - 1 < 0){
             this.venueIndex = venuesCount - 1;

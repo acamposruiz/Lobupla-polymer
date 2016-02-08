@@ -75,7 +75,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
         <!-- Drawer Content -->
         <lob-search-form></lob-search-form>
-        <lob-venue-detail venues="[[dataMap.venues]]" venue-index="[[venue]]"></lob-venue-detail>
+        <lob-venue-detail></lob-venue-detail>
       </paper-scroll-header-panel>
 
       <!-- Main Area -->
@@ -107,7 +107,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <section data-route="home">
               <paper-material elevation="1">
                 <h2 class="page-title">Map</h2>
-                  <lob-map id="myMap" on-select-venue="selectVenue"></lob-map>
+                  <lob-map id="myMap"></lob-map>
               </paper-material>
             </section>
           </iron-pages>

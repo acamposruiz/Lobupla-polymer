@@ -34,12 +34,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       listeners: {
         'update-map': 'updateMap'
       },
-      selectVenue: function(e,venueIndex){
-        /*console.dir(data.venue);*/
-        this.venue = venueIndex;
-      },
       updateMap: function(e,data){
         Polymer.dom(document.getElementsByTagName('lob-map')).node[0].fire('update-data-map', data);
+        Polymer.dom(document.getElementsByTagName('lob-venue-detail')).node[0].fire('update-data-map', data);
       }
     });
   })();

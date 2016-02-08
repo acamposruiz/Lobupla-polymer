@@ -43,7 +43,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         'update-data-map': 'updateDataMap'
       },
       _clickVenue: function(e){
-        this.fire('select-venue', e.currentTarget.venueIndex);
+        Polymer.dom(document.getElementsByTagName('lob-venue-detail')).node[0].fire('update-venue-index', e.currentTarget.venueIndex);
       },
       updateMap: function(){
         this.$.map.resize();
