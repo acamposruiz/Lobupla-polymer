@@ -74,7 +74,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         </paper-toolbar>
 
         <!-- Drawer Content -->
-        <lob-search-form showing="{{showing}}" venue-type="{{venueTypeSelected}}" total-results="{{totalResults}}"></lob-search-form>
+        <lob-search-form location="{{location}}" showing="{{showing}}" venue-type="{{venueTypeSelected}}" total-results="{{totalResults}}"></lob-search-form>
         <lob-venue-detail></lob-venue-detail>
       </paper-scroll-header-panel>
 
@@ -107,6 +107,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             <section data-route="home">
               <paper-material elevation="1">
                 <h2 class="page-title">Showing {{showing}} {{venueTypeSelected}} of {{totalResults}} results</h2>
+                <h2>
+                  in {{location}}
+                </h2>
                   <lob-map id="myMap"></lob-map>
               </paper-material>
             </section>
