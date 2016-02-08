@@ -14,26 +14,41 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style is="custom-style">
       paper-card {
-        display: block;
         --paper-card-header-color: white;
+      }
+      paper-card.detail {
+        display: block;
       }
       paper-button {
         background-color: var(--paper-indigo-500);
         color: white;
       }
+      .card-item-list:hover {
+        cursor: pointer;
+      }
     </style>
-    <paper-card heading="{{venue.name}}" image="{{imgPath}}">
-      <div class="card-content">Some content</div>
-      <div class="card-actions">
-        <paper-button raised
-                      on-click="_onPrevious">Previous
-        </paper-button>
+    <template is="dom-if" if="{{venue}}">
+      <paper-card class="detail" heading="{{venue.name}}" image="{{getImage(venue, '255x255')}}">
+        <div class="card-content">Some content</div>
+        <div class="card-actions">
+          <paper-button raised
+                        on-click="_onPrevious">Previous
+          </paper-button>
 
-        <paper-button raised
-                      on-click="_onNext">Next
-        </paper-button>
-      </div>
-    </paper-card>
+          <paper-button raised
+                        on-click="_onNext">Next
+          </paper-button>
+        </div>
+      </paper-card>
+    </template>
+
+    <template is="dom-if" if="{{!venue}}">
+      <template is="dom-repeat" items="{{venues}}">
+        <paper-card class="card-item-list" on-click="selectCard" index-card="{{index}}" heading="{{item.venue.name}}" image="{{getImage(item.venue, '80x80')}}">
+        </paper-card>
+      </template>
+    </template>
+
 
   </template>
   <script>
@@ -58,14 +73,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           },
           venue: {
             type: Object,
-            value: {},
+            value: null,
             observer: 'venueObserve',
             notify: true
           }
         },
         listeners: {
+          'reset': 'reset',
           'update-venue-index': 'updateVenueIndex',
           'update-data-map': 'updateDataMap'
+        },
+        reset: function(){
+          this.venueIndex = this.venue = null;
+        },
+        selectCard: function(e){
+          this.updateVenueIndex(e, e.currentTarget.indexCard);
         },
         updateDataMap: function(e, data){
           this.venues = data.venues;
@@ -85,6 +107,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           this.venueIndex = (this.venueIndex + 1) % venuesCount;
         },
         venuesObserve: function (venues) {
+          this.reset();
           venuesCount = venues.length;
         },
         venueIndexObserve: function (venueIndex) {
@@ -94,12 +117,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           }
           ;
         },
+        getImage: function(venue, size){
+          try{
+            return venue.photos.groups[0].items[0].prefix + size + venue.photos.groups[0].items[0].suffix;
+          }catch(e){}
+        },
         venueObserve: function (venue) {
-          try {
+         /* try {
             this.imgPath = venue.photos.groups[0].items[0].prefix + '255x255' + venue.photos.groups[0].items[0].suffix;
           } catch (e) {
           }
-          ;
+          ;*/
         }
       });
     })();
