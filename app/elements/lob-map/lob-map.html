@@ -20,8 +20,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <google-map id="map" latitude="[[data.coordenates.lat]]" longitude="[[data.coordenates.lng]]" fit-to-markers>
       <template on-dom-change="updateMap" is="dom-repeat" items="{{data.venues}}">
-        <google-map-marker latitude="{{item.venue.location.lat}}" longitude="{{item.venue.location.lng}}"
-                           title="{{item.venue.name}}"></google-map-marker>
+        <google-map-marker venue-index="{{index}}" latitude="{{item.venue.location.lat}}" longitude="{{item.venue.location.lng}}"
+                           title="{{item.venue.name}}"  click-events="true" on-google-map-marker-click="_clickVenue"></google-map-marker>
       </template>
     </google-map>
   </template>
@@ -38,6 +38,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           observer: 'dataObserve',
           notify: true
         }
+      },
+      _clickVenue: function(e){
+        this.fire('select-venue', this.data.venues[e.currentTarget.venueIndex]);
       },
       updateMap: function(){
         this.$.map.resize();
