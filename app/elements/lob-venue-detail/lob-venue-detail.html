@@ -12,22 +12,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="lob-venue-detail">
   <template>
-    <style>
-      :host {
+    <style is="custom-style">
+      paper-card {
         display: block;
+        --paper-card-header-color: white;
+      }
+      paper-button {
+        background-color: var(--paper-indigo-500);
+        color: white;
       }
     </style>
-    <header><h1>{{venue.name}}</h1></header>
-    <section>
-      <img src="{{imgPath}}" alt=""/>
-    </section>
-    <paper-button raised
-                  on-click="_onPrevious">Previous
-    </paper-button>
+    <paper-card heading="{{venue.name}}" image="{{imgPath}}">
+      <div class="card-content">Some content</div>
+      <div class="card-actions">
+        <paper-button raised
+                      on-click="_onPrevious">Previous
+        </paper-button>
 
-    <paper-button raised
-                  on-click="_onNext">Next
-    </paper-button>
+        <paper-button raised
+                      on-click="_onNext">Next
+        </paper-button>
+      </div>
+    </paper-card>
+
   </template>
   <script>
     (function () {
@@ -89,7 +96,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         },
         venueObserve: function (venue) {
           try {
-            this.imgPath = venue.photos.groups[0].items[0].prefix + '150x150' + venue.photos.groups[0].items[0].suffix;
+            this.imgPath = venue.photos.groups[0].items[0].prefix + '255x255' + venue.photos.groups[0].items[0].suffix;
           } catch (e) {
           }
           ;

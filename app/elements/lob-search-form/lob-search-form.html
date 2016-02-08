@@ -19,38 +19,59 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <dom-module id="lob-search-form">
   <template>
-    <header>
+    <style is="custom-style">
+      paper-card{
+        padding-bottom: 25px;
+      }
+      paper-button {
+        background-color: var(--paper-indigo-500);
+        color: white;
+      }
+      paper-button#submitButtom {
+        width: 85%;
+        background-color: var(--paper-green-500);
+        color: white;
+      }
+    </style>
+    <!--<header>
       <p>Total results: {{totalResults}}</p>
 
       <p>Showing: {{showing}}</p>
-    </header>
-    <div class="horizontal-section">
-      <form is="iron-form" id="lobForm" method="get" action="/">
-        Find
-        <paper-dropdown-menu label="Venue type" name="venue_type" required>
-          <paper-menu class="dropdown-content" selected="{{venueTypeSelected}}">
-            <template is="dom-repeat" items="{{venue_types}}">
-              <paper-item value="{{item}}">{{item}}</paper-item>
-            </template>
-          </paper-menu>
-        </paper-dropdown-menu>
-        near to
-        <paper-input id="locationInput" name="location" label="Location" value="{{location}}" required></paper-input>
-        <br><br>
+    </header>-->
+    <paper-card heading="Looking for...">
+      <div class="card-content">
+        <div class="horizontal-section">
+          <form is="iron-form" id="lobForm" method="get" action="/">
+            <!--Find-->
+            <paper-dropdown-menu label="Venue type" name="venue_type" required>
+              <paper-menu class="dropdown-content" selected="{{venueTypeSelected}}">
+                <template is="dom-repeat" items="{{venue_types}}">
+                  <paper-item value="{{item}}">{{item}}</paper-item>
+                </template>
+              </paper-menu>
+            </paper-dropdown-menu>
+            near to
+            <paper-input id="locationInput" name="location" label="Location" value="{{location}}"
+                         required></paper-input>
+            <br><br>
 
-        <paper-button raised
-                      on-click="_onPrevious">Previous
-        </paper-button>
+              <paper-button class="nav" raised
+                            on-click="_onPrevious">Previous
+              </paper-button>
 
-        <paper-button raised
-                      on-click="_onNext">Next
-        </paper-button>
+              <paper-button class="nav" raised
+                            on-click="_onNext">Next
+              </paper-button>
+          </form>
+        </div>
+      </div>
+      <div class="card-actions">
 
         <paper-button id="submitButtom" raised
                       on-click="_onClick">Submit
         </paper-button>
-      </form>
-    </div>
+      </div>
+    </paper-card>
     <iron-ajax
       auto
       url="https://api.foursquare.com/v2/venues/explore"
@@ -81,17 +102,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       var coordenates = {},
         paramsGoogleapis = {}, totalResults,
         showingObject = {
-          init:1,
-          last:venuesCount,
-          reset: function() {
+          init: 1,
+          last: venuesCount,
+          reset: function () {
             this.init = 1;
             this.last = 7;
             return this;
           },
-          getText: function(){
-            return this.init+' to '+ (Math.min(Number(totalResults), this.last) || this.last);
+          getText: function () {
+            return this.init + ' to ' + (Math.min(Number(totalResults), this.last) || this.last);
           },
-          update: function(value){
+          update: function (value) {
             this.init += value;
             this.last += value;
             return this;
@@ -175,7 +196,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
               notify: true
             }
           },
-          resetForm: function(){
+          resetForm: function () {
             params.offset = 0;
             this.showing = showingObject.reset().getText();
           },
@@ -239,18 +260,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             });
           },
           _onPrevious: function (event) {
-            if(params.offset > 0){
+            if (params.offset > 0) {
               params.offset -= venuesCount;
               this.showing = showingObject.update(-venuesCount).getText();
               this.params = Object.assign({}, params);
-            };
+            }
+            ;
           },
           _onNext: function (event) {
-            if(params.offset+venuesCount < this.totalResults){
+            if (params.offset + venuesCount < this.totalResults) {
               params.offset += venuesCount;
               this.showing = showingObject.update(venuesCount).getText();
               this.params = Object.assign({}, params);
-            };
+            }
+            ;
           },
           _onClick: function (event) {
             this.$.lobForm.submit();
