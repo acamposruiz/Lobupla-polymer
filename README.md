@@ -1,2 +1,2 @@
 ### Lobupla-polymer
-Web application for test PolymerJS that provide an interface to made searches with google maps API. So you can get the nearest business you need.
+Project to integrate foursquare API with Google Maps in a Polymer application. It is just a search interface so you can get the nearest business you need and visualize it in a google map.
